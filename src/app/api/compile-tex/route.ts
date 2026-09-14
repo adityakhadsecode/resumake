@@ -44,7 +44,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const texContent = body.tex;
+    // Tectonic compiles via XeTeX which natively supports Unicode UTF-8.
+    // pdfTeX-specific macros like \input{glyphtounicode} and \pdfgentounicode throw
+    // "Undefined control sequence" in XeTeX unless guarded. We auto-shim them for safety.
+    const texContent = body.tex
+      .replace(/\\input\{glyphtounicode\}/g, "\\ifdefined\\pdfgentounicode\\input{glyphtounicode}\\fi")
+      .replace(/\\pdfgentounicode\s*=\s*1/g, "\\ifdefined\\pdfgentounicode\\pdfgentounicode=1\\fi");
 
     // Create unique isolated sandbox directory in os.tmpdir()
     const runId = crypto.randomUUID();

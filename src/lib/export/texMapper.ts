@@ -217,7 +217,12 @@ ${items}
 \\usepackage{fancyhdr}
 \\usepackage[english]{babel}
 \\usepackage{tabularx}
-\\input{glyphtounicode}
+
+% Ensure PDF is machine-readable and ATS-parseable when compiled with pdfTeX (XeTeX/Tectonic is natively UTF-8)
+\\ifdefined\\pdfgentounicode
+  \\input{glyphtounicode}
+  \\pdfgentounicode=1
+\\fi
 
 % Set page margins
 \\pagestyle{fancy}
@@ -242,9 +247,6 @@ ${items}
 \\titleformat{\\section}{
   \\vspace{-4pt}\\scshape\\raggedright\\large
 }{}{0em}{}[\\color{black}\\titlerule \\vspace{-5pt}]
-
-% Ensure PDF is machine-readable and ATS-parseable
-\\pdfgentounicode=1
 
 % Custom commands
 \\newcommand{\\resumeItem}[1]{
