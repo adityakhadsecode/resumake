@@ -20,7 +20,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install static Tectonic binary to /usr/local/bin
-RUN curl --proto '=https' --tlsv1.2 -fsSL https://drop-sh.fullyjustified.net | sh -s -- --to /usr/local/bin \
+RUN cd /usr/local/bin \
+    && curl --proto '=https' --tlsv1.2 -fsSL https://drop-sh.fullyjustified.net | sh \
     && tectonic --version
 
 # ---- Stage 2: Dependencies ----
