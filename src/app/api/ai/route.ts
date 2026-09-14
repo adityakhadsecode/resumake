@@ -65,12 +65,85 @@ Rules:
 1. Focus on core technical expertise, system ownership, and measurable business impact.
 2. Maintain a confident, professional, and authentic voice.
 3. Output ONLY the summary paragraph. Do NOT use quotation marks, introductions, or pleasantries.`;
+    } else if (action === "parse-resume") {
+      prompt = `You are an expert resume parser.
+Extract all structured data from the following raw resume text and return it STRICTLY as valid JSON matching the exact TypeScript schema provided below.
+
+Schema:
+{
+  "personalInfo": {
+    "name": "Candidate Full Name",
+    "title": "Professional Title / Headline",
+    "email": "email@example.com",
+    "phone": "+1 (555) 000-0000",
+    "location": "City, State or Country",
+    "website": "portfolio or personal website URL",
+    "linkedin": "linkedin URL or handle",
+    "github": "github URL or handle"
+  },
+  "summary": "Concise professional summary",
+  "experience": [
+    {
+      "id": "exp-1",
+      "role": "Job Title",
+      "company": "Company Name",
+      "location": "City, State or Remote",
+      "startDate": "Month Year",
+      "endDate": "Month Year or Present",
+      "current": false,
+      "bullets": "• Bullet point 1\\n• Bullet point 2"
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj-1",
+      "name": "Project Name",
+      "role": "Creator or Role",
+      "link": "https://...",
+      "technologies": "React, TypeScript, Node.js",
+      "bullets": "• Bullet point 1\\n• Bullet point 2"
+    }
+  ],
+  "education": [
+    {
+      "id": "edu-1",
+      "school": "University or School Name",
+      "degree": "B.S. in Computer Science",
+      "location": "City, State",
+      "startDate": "Year",
+      "endDate": "Year",
+      "detail": "GPA: 3.9/4.0, Honors, Relevant Coursework"
+    }
+  ],
+  "skills": [
+    {
+      "id": "skill-1",
+      "category": "Languages",
+      "skills": "JavaScript, TypeScript, Python, SQL"
+    }
+  ],
+  "sectionOrder": ["summary", "experience", "projects", "education", "skills"]
+}
+
+Rules:
+1. Return ONLY the JSON object. Do NOT wrap in \`\`\`json markdown blocks, and do NOT add any conversational explanation.
+2. If any field is missing or not mentioned, set it to "" or [] (do NOT invent fake information).
+3. Format each bullet point on its own line starting with "• ".
+4. Ensure the JSON is 100% syntactically valid.
+
+Raw Resume Text:
+"""
+${content || ""}
+"""`;
     } else {
       return NextResponse.json(
         { success: false, error: "Invalid action requested." },
         { status: 400 }
       );
     }
+
+    // Dynamic token allocation
+    const maxTokens = action === "parse-resume" ? 3500 : 800;
 
     // Execute provider request
     let result = "";
@@ -85,8 +158,8 @@ Rules:
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
-            temperature: 0.4,
-            maxOutputTokens: 800,
+            temperature: action === "parse-resume" ? 0.1 : 0.4,
+            maxOutputTokens: maxTokens,
           },
         }),
       });
@@ -117,8 +190,8 @@ Rules:
         body: JSON.stringify({
           model: model || defaultModel,
           messages: [{ role: "user", content: prompt }],
-          temperature: 0.4,
-          max_tokens: 800,
+          temperature: action === "parse-resume" ? 0.1 : 0.4,
+          max_tokens: maxTokens,
         }),
       });
 
@@ -158,6 +231,22 @@ Rules:
       throw new Error(`Unsupported AI provider: ${provider}`);
     }
 
+    if (action === "parse-resume") {
+      try {
+        let clean = result.trim();
+        // Remove markdown backticks if present
+        if (clean.startsWith("```")) {
+          clean = clean.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+        }
+        const parsed = JSON.parse(clean);
+        const normalized = normalizeParsedResume(parsed);
+        return NextResponse.json({ success: true, parsedResume: normalized, result: clean });
+      } catch (parseErr: any) {
+        console.error("Failed to parse JSON response from AI:", result);
+        throw new Error("The AI returned a response that could not be parsed as valid JSON. Please try again.");
+      }
+    }
+
     return NextResponse.json({ success: true, result });
   } catch (err: any) {
     console.error("AI route error:", err);
@@ -166,4 +255,81 @@ Rules:
       { status: 500 }
     );
   }
+}
+
+function normalizeParsedResume(raw: any) {
+  const genId = (p: string) => `${p}-${Math.random().toString(36).substring(2, 9)}`;
+  return {
+    personalInfo: {
+      name: String(raw?.personalInfo?.name || "").trim(),
+      title: String(raw?.personalInfo?.title || "").trim(),
+      email: String(raw?.personalInfo?.email || "").trim(),
+      phone: String(raw?.personalInfo?.phone || "").trim(),
+      location: String(raw?.personalInfo?.location || "").trim(),
+      website: String(raw?.personalInfo?.website || "").trim(),
+      linkedin: String(raw?.personalInfo?.linkedin || "").trim(),
+      github: String(raw?.personalInfo?.github || "").trim(),
+    },
+    summary: String(raw?.summary || "").trim(),
+    experience: Array.isArray(raw?.experience)
+      ? raw.experience.map((exp: any) => ({
+          id: exp?.id || genId("exp"),
+          role: String(exp?.role || "").trim(),
+          company: String(exp?.company || "").trim(),
+          location: String(exp?.location || "").trim(),
+          startDate: String(exp?.startDate || "").trim(),
+          endDate: String(exp?.endDate || "").trim(),
+          current: Boolean(exp?.current),
+          bullets: Array.isArray(exp?.bullets)
+            ? exp.bullets
+                .map((b: string) =>
+                  b.trim().startsWith("•") ? b.trim() : `• ${b.trim()}`
+                )
+                .join("\n")
+            : String(exp?.bullets || "").trim(),
+        }))
+      : [],
+    projects: Array.isArray(raw?.projects)
+      ? raw.projects.map((proj: any) => ({
+          id: proj?.id || genId("proj"),
+          name: String(proj?.name || "").trim(),
+          role: String(proj?.role || "").trim(),
+          link: String(proj?.link || "").trim(),
+          technologies: Array.isArray(proj?.technologies)
+            ? proj.technologies.join(", ")
+            : String(proj?.technologies || "").trim(),
+          bullets: Array.isArray(proj?.bullets)
+            ? proj.bullets
+                .map((b: string) =>
+                  b.trim().startsWith("•") ? b.trim() : `• ${b.trim()}`
+                )
+                .join("\n")
+            : String(proj?.bullets || "").trim(),
+        }))
+      : [],
+    education: Array.isArray(raw?.education)
+      ? raw.education.map((edu: any) => ({
+          id: edu?.id || genId("edu"),
+          school: String(edu?.school || "").trim(),
+          degree: String(edu?.degree || "").trim(),
+          location: String(edu?.location || "").trim(),
+          startDate: String(edu?.startDate || "").trim(),
+          endDate: String(edu?.endDate || "").trim(),
+          detail: String(edu?.detail || "").trim(),
+        }))
+      : [],
+    skills: Array.isArray(raw?.skills)
+      ? raw.skills.map((s: any) => ({
+          id: s?.id || genId("skill"),
+          category: String(s?.category || "Skills").trim(),
+          skills: Array.isArray(s?.skills)
+            ? s.skills.join(", ")
+            : String(s?.skills || "").trim(),
+        }))
+      : [],
+    sectionOrder:
+      Array.isArray(raw?.sectionOrder) && raw.sectionOrder.length > 0
+        ? raw.sectionOrder
+        : ["summary", "experience", "projects", "education", "skills"],
+  };
 }

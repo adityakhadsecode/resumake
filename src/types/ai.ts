@@ -7,7 +7,11 @@ export interface AiConfig {
   ollamaUrl?: string;
 }
 
-export type AiAction = "enhance-bullets" | "generate-summary" | "test-connection";
+export type AiAction =
+  | "enhance-bullets"
+  | "generate-summary"
+  | "test-connection"
+  | "parse-resume";
 
 export interface AiRequestPayload {
   action: AiAction;
@@ -28,5 +32,6 @@ export interface AiRequestPayload {
 export interface AiResponsePayload {
   success: boolean;
   result?: string;
+  parsedResume?: any;
   error?: string;
 }

@@ -33,15 +33,16 @@ Update this file after every meaningful implementation change.
 - [x] **Unit 2.1**: Built `AiSettingsModal` and `useAiConfig` managing BYOK keys in browser `localStorage` with connection testing.
 - [x] **Unit 2.2**: Implemented Next.js route handler (`/api/ai`) with native fetch supporting Gemini, OpenAI, Groq, and Ollama.
 - [x] **Unit 2.3**: Built "Improve with AI" on Experience and Projects with before/after `AiDiffModal` (Google XYZ formula rewriting) and "Draft with AI" summary generator.
+- [x] **Unit 2.4**: Built Resume File Parser & Importer (`ResumeImportModal`, `/api/parse` route with `unpdf` & `mammoth`, AI semantic structuring into `ResumeData`, and safety review modal with replace/merge options).
 
 ## In Progress
 
-- Phase 2: Resume File Parser & Importer (PDF/DOCX/LinkedIn JSON)
+- Phase 2: Resume Import & AI Integration (Wrapping Phase 2)
 
-## Next Up (Phase 2 Roadmap)
+## Next Up
 
-1. **Unit 2.4**: Resume file parser & importer (Drag & drop PDF / text extraction to auto-populate resume fields).
-2. **Unit 2.5**: One-click AI resume tailor (tailoring whole resume to a target job description).
+1. **Unit 2.5**: One-click AI resume tailor (tailoring whole resume to a target job description).
+2. **Phase 3**: LaTeX resume integration and server-side / WASM compilation.
 
 ## Open Questions
 

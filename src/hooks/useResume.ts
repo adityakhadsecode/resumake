@@ -313,6 +313,50 @@ export function useResume() {
     return false;
   }, []);
 
+  const loadResumeData = useCallback((newData: ResumeData) => {
+    if (newData && typeof newData === "object" && newData.personalInfo) {
+      setData(newData);
+      return true;
+    }
+    return false;
+  }, []);
+
+  const mergeResumeData = useCallback((incoming: Partial<ResumeData>) => {
+    setData((prev) => {
+      const merged: ResumeData = {
+        personalInfo: {
+          name: incoming.personalInfo?.name || prev.personalInfo.name,
+          title: incoming.personalInfo?.title || prev.personalInfo.title,
+          email: incoming.personalInfo?.email || prev.personalInfo.email,
+          phone: incoming.personalInfo?.phone || prev.personalInfo.phone,
+          location: incoming.personalInfo?.location || prev.personalInfo.location,
+          website: incoming.personalInfo?.website || prev.personalInfo.website,
+          linkedin: incoming.personalInfo?.linkedin || prev.personalInfo.linkedin,
+          github: incoming.personalInfo?.github || prev.personalInfo.github,
+        },
+        summary: incoming.summary || prev.summary,
+        experience: [
+          ...(incoming.experience || []),
+          ...prev.experience,
+        ],
+        projects: [
+          ...(incoming.projects || []),
+          ...prev.projects,
+        ],
+        education: [
+          ...(incoming.education || []),
+          ...prev.education,
+        ],
+        skills: [
+          ...(incoming.skills || []),
+          ...prev.skills,
+        ],
+        sectionOrder: incoming.sectionOrder || prev.sectionOrder,
+      };
+      return merged;
+    });
+  }, []);
+
   return {
     data,
     isLoaded,
@@ -339,5 +383,7 @@ export function useResume() {
     clearAll,
     exportJSON,
     importJSON,
+    loadResumeData,
+    mergeResumeData,
   };
 }

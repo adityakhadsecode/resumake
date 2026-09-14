@@ -2,6 +2,8 @@
 
 import React, { useRef } from "react";
 
+import { UploadCloud } from "lucide-react";
+
 interface HeaderBarProps {
   onPrint: () => void;
   onReset: () => void;
@@ -9,6 +11,7 @@ interface HeaderBarProps {
   onExportJSON: () => void;
   onImportJSON: (data: any) => boolean;
   onOpenAiSettings: () => void;
+  onOpenImportModal: () => void;
   isAiConfigured: boolean;
   lastSaved: Date | null;
 }
@@ -20,6 +23,7 @@ export function HeaderBar({
   onExportJSON,
   onImportJSON,
   onOpenAiSettings,
+  onOpenImportModal,
   isAiConfigured,
   lastSaved,
 }: HeaderBarProps) {
@@ -97,21 +101,15 @@ export function HeaderBar({
           Export JSON
         </button>
 
-        {/* Import JSON */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".json"
-          onChange={handleFileChange}
-          className="hidden"
-        />
+        {/* Import Resume */}
         <button
           type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="text-[12.5px] text-[#5B5F6B] hover:text-[#1C1D21] hover:underline cursor-pointer px-2 py-1"
-          title="Restore from JSON"
+          onClick={onOpenImportModal}
+          className="flex items-center gap-1.5 text-[12.5px] font-medium text-[#28344E] hover:underline cursor-pointer px-2 py-1"
+          title="Import resume from PDF, Word (.docx), text, or JSON"
         >
-          Import JSON
+          <UploadCloud size={14} className="text-[#28344E]" />
+          <span>Import Resume</span>
         </button>
 
         {/* AI Setup */}

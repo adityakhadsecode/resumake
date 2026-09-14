@@ -10,7 +10,8 @@ import { JakesTemplate } from "@/components/templates/JakesTemplate";
 import { PrintModal } from "@/components/builder/PrintModal";
 import { AiSettingsModal } from "@/components/builder/AiSettingsModal";
 import { AiDiffModal } from "@/components/builder/AiDiffModal";
-import { ExperienceItem, ProjectItem } from "@/types/resume";
+import { ResumeImportModal } from "@/components/builder/ResumeImportModal";
+import { ExperienceItem, ProjectItem, ResumeData } from "@/types/resume";
 
 export default function Home() {
   const {
@@ -39,6 +40,8 @@ export default function Home() {
     clearAll,
     exportJSON,
     importJSON,
+    loadResumeData,
+    mergeResumeData,
   } = useResume();
 
   const { config: aiConfig, isConfigured: isAiConfigured, saveConfig: saveAiConfig } = useAiConfig();
@@ -46,6 +49,7 @@ export default function Home() {
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [isAiSettingsOpen, setIsAiSettingsOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // AI Diff Modal State
   const [diffModal, setDiffModal] = useState<{
@@ -258,6 +262,7 @@ export default function Home() {
         onExportJSON={exportJSON}
         onImportJSON={importJSON}
         onOpenAiSettings={() => setIsAiSettingsOpen(true)}
+        onOpenImportModal={() => setIsImportModalOpen(true)}
         isAiConfigured={isAiConfigured}
         lastSaved={lastSaved}
       />
@@ -368,6 +373,21 @@ export default function Home() {
         enhancedText={diffModal.enhanced}
         title={diffModal.title}
         onApply={diffModal.onApply}
+      />
+
+      {/* Resume Import Modal (PDF / DOCX / TXT / JSON) */}
+      <ResumeImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        aiConfig={aiConfig}
+        onOpenAiSettings={() => setIsAiSettingsOpen(true)}
+        onApplyParsedData={(parsedData, mode) => {
+          if (mode === "replace") {
+            loadResumeData(parsedData);
+          } else {
+            mergeResumeData(parsedData);
+          }
+        }}
       />
     </div>
   );
