@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { extractText } from "unpdf";
-import * as mammoth from "mammoth";
 
 export async function POST(req: NextRequest) {
   try {
@@ -64,8 +63,15 @@ export async function POST(req: NextRequest) {
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
-      const result = await mammoth.extractRawText({ buffer });
-      extractedText = result.value || "";
+      try {
+        const mammoth = await import("mammoth");
+        const result = await mammoth.extractRawText({ buffer });
+        extractedText = result.value || "";
+      } catch (loadErr: any) {
+        throw new Error(
+          "Word document parser is not available. Please run 'npm install' or paste text directly."
+        );
+      }
     } else if (lowerName.endsWith(".json") || fileType.includes("json")) {
       fileType = "application/json";
       extractedText = await file.text();
