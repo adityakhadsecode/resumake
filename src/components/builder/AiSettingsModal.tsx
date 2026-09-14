@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AiConfig, AiProvider } from "@/types/ai";
 
 interface AiSettingsModalProps {
@@ -10,6 +10,102 @@ interface AiSettingsModalProps {
   onSave: (newConfig: Partial<AiConfig>) => void;
 }
 
+interface ModelOption {
+  id: string;
+  name: string;
+  badge?: string;
+  desc: string;
+}
+
+const PROVIDER_MODELS: Record<AiProvider, ModelOption[]> = {
+  gemini: [
+    {
+      id: "gemini-1.5-flash",
+      name: "Gemini 1.5 Flash",
+      badge: "Recommended · Free Tier",
+      desc: "Fast, generous free tier rate limits, and 1M context window.",
+    },
+    {
+      id: "gemini-1.5-pro",
+      name: "Gemini 1.5 Pro",
+      badge: "Deep Reasoning",
+      desc: "Higher analytical power for complex multi-page executive resumes.",
+    },
+    {
+      id: "gemini-2.0-flash",
+      name: "Gemini 2.0 Flash",
+      badge: "Next-Gen Speed",
+      desc: "Google's newest low-latency multimodal model.",
+    },
+  ],
+  groq: [
+    {
+      id: "llama-3.1-8b-instant",
+      name: "Llama 3.1 8B",
+      badge: "Recommended · Ultra Fast",
+      desc: "Instantaneous responses (< 600ms) with high formatting accuracy.",
+    },
+    {
+      id: "llama-3.3-70b-versatile",
+      name: "Llama 3.3 70B",
+      badge: "High Intelligence",
+      desc: "Flagship open-weight intelligence for superior phrasing.",
+    },
+    {
+      id: "mixtral-8x7b-32768",
+      name: "Mixtral 8x7B",
+      badge: "MoE 32k",
+      desc: "Mixture-of-Experts architecture with 32k context window.",
+    },
+  ],
+  openai: [
+    {
+      id: "gpt-4o-mini",
+      name: "GPT-4o Mini",
+      badge: "Recommended · Fast & Cheap",
+      desc: "Smarter than GPT-3.5 Turbo at a fraction of the cost.",
+    },
+    {
+      id: "gpt-4o",
+      name: "GPT-4o",
+      badge: "Flagship Multimodal",
+      desc: "Top-tier prose and executive resume tailoring.",
+    },
+    {
+      id: "o3-mini",
+      name: "o3-mini",
+      badge: "STEM & Deep Logic",
+      desc: "Optimized for deep technical problem solving and precision.",
+    },
+  ],
+  ollama: [
+    {
+      id: "llama3",
+      name: "Llama 3 (8B)",
+      badge: "Recommended Default",
+      desc: "Standard local model (run: ollama run llama3).",
+    },
+    {
+      id: "llama3.2",
+      name: "Llama 3.2 (3B)",
+      badge: "Lightweight",
+      desc: "Runs smoothly on laptops with limited RAM/VRAM.",
+    },
+    {
+      id: "mistral",
+      name: "Mistral 7B",
+      badge: "Balanced",
+      desc: "Classic open-weights model with punchy writing style.",
+    },
+    {
+      id: "qwen2.5",
+      name: "Qwen 2.5",
+      badge: "High Precision",
+      desc: "Strong multilingual & code logic comprehension.",
+    },
+  ],
+};
+
 export function AiSettingsModal({
   isOpen,
   onClose,
@@ -18,7 +114,11 @@ export function AiSettingsModal({
 }: AiSettingsModalProps) {
   const [provider, setProvider] = useState<AiProvider>(config.provider || "gemini");
   const [apiKey, setApiKey] = useState(config.apiKey || "");
-  const [model, setModel] = useState(config.model || "");
+  const [selectedModel, setSelectedModel] = useState(
+    config.model || PROVIDER_MODELS[config.provider || "gemini"][0].id
+  );
+  const [isCustomModel, setIsCustomModel] = useState(false);
+  const [customModelText, setCustomModelText] = useState("");
   const [ollamaUrl, setOllamaUrl] = useState(config.ollamaUrl || "http://localhost:11434");
   const [showKey, setShowKey] = useState(false);
 
@@ -26,7 +126,56 @@ export function AiSettingsModal({
   const [testStatus, setTestStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [testMessage, setTestMessage] = useState("");
 
+  // Sync state when config changes or modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const activeProvider = config.provider || "gemini";
+      setProvider(activeProvider);
+      setApiKey(config.apiKey || "");
+      setOllamaUrl(config.ollamaUrl || "http://localhost:11434");
+
+      const models = PROVIDER_MODELS[activeProvider];
+      const matchingModel = models.find((m) => m.id === config.model);
+
+      if (config.model && !matchingModel) {
+        setIsCustomModel(true);
+        setCustomModelText(config.model);
+        setSelectedModel("custom");
+      } else {
+        setIsCustomModel(false);
+        setCustomModelText("");
+        setSelectedModel(config.model || models[0].id);
+      }
+
+      setTestStatus("idle");
+      setTestMessage("");
+    }
+  }, [isOpen, config]);
+
   if (!isOpen) return null;
+
+  const handleProviderChange = (newProvider: AiProvider) => {
+    setProvider(newProvider);
+    setIsCustomModel(false);
+    setCustomModelText("");
+    setSelectedModel(PROVIDER_MODELS[newProvider][0].id);
+    setTestStatus("idle");
+    setTestMessage("");
+  };
+
+  const handleModelDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    if (val === "custom") {
+      setIsCustomModel(true);
+      setSelectedModel("custom");
+    } else {
+      setIsCustomModel(false);
+      setSelectedModel(val);
+    }
+    setTestStatus("idle");
+  };
+
+  const effectiveModel = isCustomModel ? customModelText.trim() : selectedModel;
 
   const handleTestConnection = async () => {
     setTestStatus("loading");
@@ -40,7 +189,7 @@ export function AiSettingsModal({
           action: "test-connection",
           provider,
           apiKey,
-          model,
+          model: effectiveModel,
           ollamaUrl,
         }),
       });
@@ -63,11 +212,15 @@ export function AiSettingsModal({
     onSave({
       provider,
       apiKey: apiKey.trim(),
-      model: model.trim(),
+      model: effectiveModel,
       ollamaUrl: ollamaUrl.trim(),
     });
     onClose();
   };
+
+  const currentModelObj = PROVIDER_MODELS[provider].find(
+    (m) => m.id === selectedModel
+  );
 
   return (
     <div
@@ -76,7 +229,7 @@ export function AiSettingsModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[480px] rounded-[6px] border border-[#DAD5C9] bg-[#FCFBF9] p-6 shadow-xl text-[#1C1D21]"
+        className="w-full max-w-[500px] rounded-[6px] border border-[#DAD5C9] bg-[#FCFBF9] p-6 shadow-xl text-[#1C1D21] max-h-[92vh] overflow-y-auto"
         style={{
           boxShadow: "0 10px 30px rgba(28, 29, 33, 0.18), 0 1px 3px rgba(28, 29, 33, 0.08)",
         }}
@@ -96,7 +249,7 @@ export function AiSettingsModal({
             </span>
           </div>
           <p className="text-[12px] text-[#5B5F6B] mt-1 leading-snug">
-            Configure your AI provider to enable one-click bullet point rewriting and summary generation.
+            Configure your AI provider and preferred model for bullet rewriting, summary drafting, and job tailoring.
           </p>
         </div>
 
@@ -107,18 +260,15 @@ export function AiSettingsModal({
           </label>
           <div className="grid grid-cols-2 gap-2">
             {[
-              { id: "gemini", label: "Google Gemini", tag: "Free Tier" },
-              { id: "groq", label: "Groq", tag: "Fast / Free" },
-              { id: "openai", label: "OpenAI", tag: "GPT-4o" },
-              { id: "ollama", label: "Ollama", tag: "100% Offline" },
+              { id: "gemini", label: "Google Gemini", tag: "Free Tier Available" },
+              { id: "groq", label: "Groq", tag: "Ultra Fast Inference" },
+              { id: "openai", label: "OpenAI", tag: "GPT-4o & o3-mini" },
+              { id: "ollama", label: "Ollama", tag: "100% Offline / Local" },
             ].map((p) => (
               <button
                 key={p.id}
                 type="button"
-                onClick={() => {
-                  setProvider(p.id as AiProvider);
-                  setTestStatus("idle");
-                }}
+                onClick={() => handleProviderChange(p.id as AiProvider)}
                 className={`flex flex-col items-start px-3 py-2 rounded-[4px] border text-left cursor-pointer transition-colors ${
                   provider === p.id
                     ? "border-[#28344E] bg-[#FAFAF8] text-[#28344E]"
@@ -130,6 +280,60 @@ export function AiSettingsModal({
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Model Selector */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-[11.5px] font-medium text-[#5B5F6B]">
+              Model Selection
+            </label>
+            {currentModelObj?.badge && (
+              <span className="text-[10.5px] text-[#28344E] font-medium bg-[#28344E]/5 px-2 py-0.5 rounded">
+                {currentModelObj.badge}
+              </span>
+            )}
+          </div>
+
+          <select
+            value={isCustomModel ? "custom" : selectedModel}
+            onChange={handleModelDropdownChange}
+            className="w-full box-border px-2.5 py-2 border border-[#DAD5C9] rounded-[3px] text-[13px] bg-white text-[#1C1D21] focus:outline-none focus:border-[#28344E]"
+          >
+            {PROVIDER_MODELS[provider].map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name} — {m.badge || m.id}
+              </option>
+            ))}
+            <option value="custom">Custom / Other Model Name...</option>
+          </select>
+
+          {isCustomModel && (
+            <div className="mt-2">
+              <input
+                type="text"
+                value={customModelText}
+                onChange={(e) => {
+                  setCustomModelText(e.target.value);
+                  setTestStatus("idle");
+                }}
+                placeholder={
+                  provider === "gemini"
+                    ? "e.g. gemini-1.5-pro-latest"
+                    : provider === "ollama"
+                    ? "e.g. deepseek-r1:8b or phi4"
+                    : "Enter custom model ID"
+                }
+                className="w-full box-border px-2.5 py-1.5 border border-[#DAD5C9] rounded-[3px] text-[12.5px] bg-white text-[#1C1D21] focus:outline-none focus:border-[#28344E] font-mono"
+              />
+            </div>
+          )}
+
+          {!isCustomModel && currentModelObj?.desc && (
+            <p className="text-[11px] text-[#5B5F6B] mt-1.5 leading-snug">
+              {currentModelObj.desc}
+            </p>
+          )}
         </div>
 
         {/* Provider Specific Inputs */}
@@ -148,7 +352,7 @@ export function AiSettingsModal({
                   href="https://aistudio.google.com/app/apikey"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[11px] text-[#28344E] hover:underline"
+                  className="text-[11px] text-[#28344E] hover:underline font-medium"
                 >
                   Get free key ↗
                 </a>
@@ -180,7 +384,7 @@ export function AiSettingsModal({
               </button>
             </div>
             <p className="text-[11px] text-[#5B5F6B] mt-1">
-              Your key is saved in your browser&apos;s LocalStorage and is never shared or stored on any server.
+              Your key is saved strictly in your browser&apos;s LocalStorage and is never shared with third parties.
             </p>
           </div>
         ) : (
@@ -199,7 +403,7 @@ export function AiSettingsModal({
               className="w-full box-border px-2.5 py-1.5 border border-[#DAD5C9] rounded-[3px] text-[13px] bg-white text-[#1C1D21] focus:outline-none focus:border-[#28344E]"
             />
             <p className="text-[11px] text-[#5B5F6B] mt-1">
-              Make sure Ollama is running locally with your desired model (e.g. <code className="bg-[#E9E7E1] px-1 py-0.5 rounded text-[10px]">ollama run llama3</code>).
+              Make sure Ollama is running locally with your chosen model (e.g. <code className="bg-[#E9E7E1] px-1 py-0.5 rounded text-[10px]">ollama run {effectiveModel || "llama3"}</code>).
             </p>
           </div>
         )}
