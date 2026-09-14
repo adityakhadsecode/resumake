@@ -11,6 +11,7 @@ import { PrintModal } from "@/components/builder/PrintModal";
 import { AiSettingsModal } from "@/components/builder/AiSettingsModal";
 import { AiDiffModal } from "@/components/builder/AiDiffModal";
 import { ResumeImportModal } from "@/components/builder/ResumeImportModal";
+import { JobTailorModal } from "@/components/builder/JobTailorModal";
 import { ExperienceItem, ProjectItem, ResumeData } from "@/types/resume";
 
 export default function Home() {
@@ -42,6 +43,7 @@ export default function Home() {
     importJSON,
     loadResumeData,
     mergeResumeData,
+    applyTailoredUpdates,
   } = useResume();
 
   const { config: aiConfig, isConfigured: isAiConfigured, saveConfig: saveAiConfig } = useAiConfig();
@@ -50,6 +52,7 @@ export default function Home() {
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [isAiSettingsOpen, setIsAiSettingsOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isTailorModalOpen, setIsTailorModalOpen] = useState(false);
 
   // AI Diff Modal State
   const [diffModal, setDiffModal] = useState<{
@@ -263,6 +266,7 @@ export default function Home() {
         onImportJSON={importJSON}
         onOpenAiSettings={() => setIsAiSettingsOpen(true)}
         onOpenImportModal={() => setIsImportModalOpen(true)}
+        onOpenTailorModal={() => setIsTailorModalOpen(true)}
         isAiConfigured={isAiConfigured}
         lastSaved={lastSaved}
       />
@@ -388,6 +392,16 @@ export default function Home() {
             mergeResumeData(parsedData);
           }
         }}
+      />
+
+      {/* AI Job Tailor Modal */}
+      <JobTailorModal
+        isOpen={isTailorModalOpen}
+        onClose={() => setIsTailorModalOpen(false)}
+        resumeData={data}
+        aiConfig={aiConfig}
+        onOpenAiSettings={() => setIsAiSettingsOpen(true)}
+        onApplyTailored={applyTailoredUpdates}
       />
     </div>
   );

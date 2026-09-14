@@ -135,6 +135,65 @@ Raw Resume Text:
 """
 ${content || ""}
 """`;
+    } else if (action === "tailor-resume") {
+      const resume = context?.resumeData;
+      if (!resume) {
+        return NextResponse.json(
+          { success: false, error: "Resume data is required for tailoring." },
+          { status: 400 }
+        );
+      }
+
+      prompt = `You are a world-class executive recruiter, hiring manager, and ATS algorithm specialist.
+Analyze the candidate's resume against the target Job Description (JD).
+Perform an in-depth ATS keyword match & gap analysis, and re-tailor the resume's summary, experience bullet points, and skills to maximize ATS alignment for this specific position.
+
+Target Job Description:
+"""
+${content || ""}
+"""
+
+Candidate's Current Resume:
+${JSON.stringify(resume, null, 2)}
+
+Instructions:
+1. ATS Score & Keywords:
+   - Calculate an objective ATS match score (0 to 100) based on title relevance, required skills, tools, and experience level.
+   - Identify up to 10 "matchedKeywords" (hard skills/tools present in both resume and JD).
+   - Identify up to 10 "missingKeywords" (critical skills/terms in the JD that the candidate should emphasize).
+   - Write a 1-2 sentence "summaryAnalysis" from a hiring manager's perspective.
+2. Tailored Professional Summary:
+   - Rewrite the candidate's professional summary to directly pitch their background to this specific role and company, incorporating key terminology from the JD while maintaining authentic truth.
+3. Tailored Experience Bullet Points:
+   - For each work experience entry in the resume, rewrite the bullets to highlight achievements and responsibilities that directly relate to the target JD's requirements.
+   - Use Google's XYZ formula ("Accomplished [X] measured by [Y] by doing [Z]") starting each bullet with an active, powerful verb.
+   - IMPORTANT: Keep the exact same "id", "role", and "company" from the original experience list so they map 1:1.
+4. Suggested Skills Additions:
+   - List up to 8 high-priority hard skills or tools from the JD that the candidate should highlight.
+
+Output Schema:
+Return STRICTLY valid JSON with this exact structure:
+{
+  "matchScore": number,
+  "matchedKeywords": string[],
+  "missingKeywords": string[],
+  "summaryAnalysis": string,
+  "tailoredSummary": string,
+  "tailoredExperiences": [
+    {
+      "id": string (must match original experience id),
+      "role": string,
+      "company": string,
+      "originalBullets": string,
+      "tailoredBullets": string (clean bullets with • on each line)
+    }
+  ],
+  "suggestedSkillsAdditions": string[]
+}
+
+Rules:
+- Return ONLY the raw JSON object. Do NOT wrap in markdown code blocks like \`\`\`json.
+- Do NOT invent completely fictitious companies or degrees; elevate the candidate's real work to resonate with the target position.`;
     } else {
       return NextResponse.json(
         { success: false, error: "Invalid action requested." },
@@ -143,7 +202,8 @@ ${content || ""}
     }
 
     // Dynamic token allocation
-    const maxTokens = action === "parse-resume" ? 3500 : 800;
+    const maxTokens =
+      action === "parse-resume" || action === "tailor-resume" ? 3500 : 800;
 
     // Execute provider request
     let result = "";
@@ -158,7 +218,10 @@ ${content || ""}
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
-            temperature: action === "parse-resume" ? 0.1 : 0.4,
+            temperature:
+              action === "parse-resume" || action === "tailor-resume"
+                ? 0.2
+                : 0.4,
             maxOutputTokens: maxTokens,
           },
         }),
@@ -190,7 +253,10 @@ ${content || ""}
         body: JSON.stringify({
           model: model || defaultModel,
           messages: [{ role: "user", content: prompt }],
-          temperature: action === "parse-resume" ? 0.1 : 0.4,
+          temperature:
+            action === "parse-resume" || action === "tailor-resume"
+              ? 0.2
+              : 0.4,
           max_tokens: maxTokens,
         }),
       });
@@ -244,6 +310,49 @@ ${content || ""}
       } catch (parseErr: any) {
         console.error("Failed to parse JSON response from AI:", result);
         throw new Error("The AI returned a response that could not be parsed as valid JSON. Please try again.");
+      }
+    }
+
+    if (action === "tailor-resume") {
+      try {
+        let clean = result.trim();
+        if (clean.startsWith("```")) {
+          clean = clean.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+        }
+        const parsed = JSON.parse(clean);
+        const tailorResult = {
+          matchScore: Math.min(100, Math.max(0, Number(parsed?.matchScore) || 50)),
+          matchedKeywords: Array.isArray(parsed?.matchedKeywords)
+            ? parsed.matchedKeywords.map(String)
+            : [],
+          missingKeywords: Array.isArray(parsed?.missingKeywords)
+            ? parsed.missingKeywords.map(String)
+            : [],
+          summaryAnalysis: String(parsed?.summaryAnalysis || "").trim(),
+          tailoredSummary: String(parsed?.tailoredSummary || "").trim(),
+          tailoredExperiences: Array.isArray(parsed?.tailoredExperiences)
+            ? parsed.tailoredExperiences.map((exp: any) => ({
+                id: String(exp?.id || ""),
+                role: String(exp?.role || ""),
+                company: String(exp?.company || ""),
+                originalBullets: String(exp?.originalBullets || ""),
+                tailoredBullets: Array.isArray(exp?.tailoredBullets)
+                  ? exp.tailoredBullets
+                      .map((b: string) =>
+                        b.trim().startsWith("•") ? b.trim() : `• ${b.trim()}`
+                      )
+                      .join("\n")
+                  : String(exp?.tailoredBullets || "").trim(),
+              }))
+            : [],
+          suggestedSkillsAdditions: Array.isArray(parsed?.suggestedSkillsAdditions)
+            ? parsed.suggestedSkillsAdditions.map(String)
+            : [],
+        };
+        return NextResponse.json({ success: true, tailorResult, result: clean });
+      } catch (parseErr: any) {
+        console.error("Failed to parse tailoring JSON from AI:", result);
+        throw new Error("AI returned a response that could not be parsed as valid JSON. Please try again.");
       }
     }
 

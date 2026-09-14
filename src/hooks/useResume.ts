@@ -357,6 +357,70 @@ export function useResume() {
     });
   }, []);
 
+  const applyTailoredUpdates = useCallback(
+    ({
+      summary,
+      experiences,
+      skillsToAdd,
+    }: {
+      summary?: string;
+      experiences?: Array<{ id: string; bullets: string }>;
+      skillsToAdd?: string[];
+    }) => {
+      setData((prev) => {
+        let updatedSummary = prev.summary;
+        if (summary !== undefined) {
+          updatedSummary = summary;
+        }
+
+        let updatedExperience = [...prev.experience];
+        if (experiences && experiences.length > 0) {
+          const expMap = new Map(experiences.map((e) => [e.id, e.bullets]));
+          updatedExperience = updatedExperience.map((item) => {
+            if (expMap.has(item.id)) {
+              return { ...item, bullets: expMap.get(item.id)! };
+            }
+            return item;
+          });
+        }
+
+        let updatedSkills = [...prev.skills];
+        if (skillsToAdd && skillsToAdd.length > 0) {
+          const newSkillsStr = skillsToAdd.join(", ");
+          if (updatedSkills.length > 0) {
+            updatedSkills = updatedSkills.map((cat, idx) => {
+              if (idx === 0) {
+                return {
+                  ...cat,
+                  skills: cat.skills
+                    ? `${cat.skills}, ${newSkillsStr}`
+                    : newSkillsStr,
+                };
+              }
+              return cat;
+            });
+          } else {
+            updatedSkills = [
+              {
+                id: generateId("skill"),
+                category: "Target Job Skills",
+                skills: newSkillsStr,
+              },
+            ];
+          }
+        }
+
+        return {
+          ...prev,
+          summary: updatedSummary,
+          experience: updatedExperience,
+          skills: updatedSkills,
+        };
+      });
+    },
+    []
+  );
+
   return {
     data,
     isLoaded,
@@ -385,5 +449,6 @@ export function useResume() {
     importJSON,
     loadResumeData,
     mergeResumeData,
+    applyTailoredUpdates,
   };
 }

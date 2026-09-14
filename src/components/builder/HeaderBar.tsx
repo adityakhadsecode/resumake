@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 
-import { UploadCloud } from "lucide-react";
+import { UploadCloud, Target } from "lucide-react";
 
 interface HeaderBarProps {
   onPrint: () => void;
@@ -12,6 +12,7 @@ interface HeaderBarProps {
   onImportJSON: (data: any) => boolean;
   onOpenAiSettings: () => void;
   onOpenImportModal: () => void;
+  onOpenTailorModal: () => void;
   isAiConfigured: boolean;
   lastSaved: Date | null;
 }
@@ -24,6 +25,7 @@ export function HeaderBar({
   onImportJSON,
   onOpenAiSettings,
   onOpenImportModal,
+  onOpenTailorModal,
   isAiConfigured,
   lastSaved,
 }: HeaderBarProps) {
@@ -109,7 +111,18 @@ export function HeaderBar({
           title="Import resume from PDF, Word (.docx), text, or JSON"
         >
           <UploadCloud size={14} className="text-[#28344E]" />
-          <span>Import Resume</span>
+          <span>Import</span>
+        </button>
+
+        {/* Tailor to Job */}
+        <button
+          type="button"
+          onClick={onOpenTailorModal}
+          className="flex items-center gap-1.5 text-[12.5px] font-medium text-[#28344E] hover:underline cursor-pointer px-2 py-1"
+          title="Tailor resume to a target job description"
+        >
+          <Target size={14} className="text-[#28344E]" />
+          <span>Tailor to Job</span>
         </button>
 
         {/* AI Setup */}

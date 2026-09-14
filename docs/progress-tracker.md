@@ -34,15 +34,19 @@ Update this file after every meaningful implementation change.
 - [x] **Unit 2.2**: Implemented Next.js route handler (`/api/ai`) with native fetch supporting Gemini, OpenAI, Groq, and Ollama.
 - [x] **Unit 2.3**: Built "Improve with AI" on Experience and Projects with before/after `AiDiffModal` (Google XYZ formula rewriting) and "Draft with AI" summary generator.
 - [x] **Unit 2.4**: Built Resume File Parser & Importer (`ResumeImportModal`, `/api/parse` route with `unpdf` & `mammoth`, AI semantic structuring into `ResumeData`, and safety review modal with replace/merge options).
+- [x] **Unit 2.5**: Built One-Click AI Job Tailor (`JobTailorModal`, ATS keyword match & gap analysis, match score percentage, and selective application of tailored summaries, bullets, and skills).
 
-## In Progress
+## Current Phase
 
-- Phase 2: Resume Import & AI Integration (Wrapping Phase 2)
+- Phase 1: Core Form Builder & High-Fidelity PDF Export (Complete)
+- Phase 2: Resume Import & AI Integration (Complete)
+- Phase 3: LaTeX Resume Integration & WASM/Cloud Compilation (Ready to Start)
 
-## Next Up
+## Next Up (Phase 3 Roadmap)
 
-1. **Unit 2.5**: One-click AI resume tailor (tailoring whole resume to a target job description).
-2. **Phase 3**: LaTeX resume integration and server-side / WASM compilation.
+1. **Unit 3.1**: Bi-directional LaTeX template generator and code viewer.
+2. **Unit 3.2**: Serverless / WASM LaTeX compilation engine (MiTeX / Typst / SwiftLaTeX).
+3. **Unit 3.3**: Dual-sync editor (edit LaTeX code or form inputs with instant 2-way reflection).
 
 ## Open Questions
 
