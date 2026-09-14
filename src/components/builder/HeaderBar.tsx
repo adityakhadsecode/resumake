@@ -8,6 +8,8 @@ interface HeaderBarProps {
   onClear: () => void;
   onExportJSON: () => void;
   onImportJSON: (data: any) => boolean;
+  onOpenAiSettings: () => void;
+  isAiConfigured: boolean;
   lastSaved: Date | null;
 }
 
@@ -17,6 +19,8 @@ export function HeaderBar({
   onClear,
   onExportJSON,
   onImportJSON,
+  onOpenAiSettings,
+  isAiConfigured,
   lastSaved,
 }: HeaderBarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -108,6 +112,21 @@ export function HeaderBar({
           title="Restore from JSON"
         >
           Import JSON
+        </button>
+
+        {/* AI Setup */}
+        <button
+          type="button"
+          onClick={onOpenAiSettings}
+          className="flex items-center gap-1.5 text-[12.5px] font-medium text-[#28344E] hover:underline cursor-pointer px-2 py-1"
+          title="Configure AI API key (Gemini / OpenAI / Groq / Ollama)"
+        >
+          <span
+            className={`inline-block h-2 w-2 rounded-full ${
+              isAiConfigured ? "bg-emerald-600" : "bg-[#DAD5C9]"
+            }`}
+          />
+          <span>AI Assistant</span>
         </button>
 
         {/* Primary Download PDF */}

@@ -2,11 +2,15 @@
 
 import React, { useState } from "react";
 import { useResume } from "@/hooks/useResume";
+import { useAiConfig } from "@/hooks/useAiConfig";
 import { HeaderBar } from "@/components/builder/HeaderBar";
 import { FormPane } from "@/components/builder/FormPane";
 import { PreviewPane } from "@/components/preview/PreviewPane";
 import { JakesTemplate } from "@/components/templates/JakesTemplate";
 import { PrintModal } from "@/components/builder/PrintModal";
+import { AiSettingsModal } from "@/components/builder/AiSettingsModal";
+import { AiDiffModal } from "@/components/builder/AiDiffModal";
+import { ExperienceItem, ProjectItem } from "@/types/resume";
 
 export default function Home() {
   const {
@@ -37,9 +41,32 @@ export default function Home() {
     importJSON,
   } = useResume();
 
+  const { config: aiConfig, isConfigured: isAiConfigured, saveConfig: saveAiConfig } = useAiConfig();
+
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [isAiSettingsOpen, setIsAiSettingsOpen] = useState(false);
 
+  // AI Diff Modal State
+  const [diffModal, setDiffModal] = useState<{
+    isOpen: boolean;
+    original: string;
+    enhanced: string;
+    title: string;
+    onApply: (newText: string) => void;
+  }>({
+    isOpen: false,
+    original: "",
+    enhanced: "",
+    title: "",
+    onApply: () => {},
+  });
+
+  // AI Loading indicators
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const [activeEnhanceId, setActiveEnhanceId] = useState<string | null>(null);
+
+  // Native Print
   const triggerNativePrint = () => {
     const originalTitle = document.title;
     const cleanName = (data.personalInfo.name || "Resume")
@@ -65,6 +92,154 @@ export default function Home() {
     setIsPrintModalOpen(true);
   };
 
+  // AI Action: Generate Professional Summary
+  const handleGenerateSummaryAi = async () => {
+    if (!isAiConfigured) {
+      setIsAiSettingsOpen(true);
+      return;
+    }
+
+    setIsGeneratingSummary(true);
+    try {
+      const expSummary = data.experience
+        .map((e) => `${e.role} at ${e.company}`)
+        .filter(Boolean)
+        .join("; ");
+      const allSkills = data.skills.map((s) => s.skills).filter(Boolean);
+
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "generate-summary",
+          provider: aiConfig.provider,
+          apiKey: aiConfig.apiKey,
+          model: aiConfig.model,
+          ollamaUrl: aiConfig.ollamaUrl,
+          context: {
+            role: data.personalInfo.title,
+            experienceSummary: expSummary,
+            skills: allSkills,
+          },
+        }),
+      });
+
+      const json = await res.json();
+      if (json.success && json.result) {
+        updateSummary(json.result);
+      } else {
+        alert(json.error || "Failed to generate summary with AI.");
+      }
+    } catch (err: any) {
+      alert(err.message || "Failed to communicate with AI.");
+    } finally {
+      setIsGeneratingSummary(false);
+    }
+  };
+
+  // AI Action: Enhance Experience Bullets
+  const handleImproveExperienceAi = async (item: ExperienceItem) => {
+    if (!isAiConfigured) {
+      setIsAiSettingsOpen(true);
+      return;
+    }
+
+    if (!item.bullets.trim()) {
+      alert("Please add at least one rough bullet point first to enhance.");
+      return;
+    }
+
+    setActiveEnhanceId(item.id);
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "enhance-bullets",
+          provider: aiConfig.provider,
+          apiKey: aiConfig.apiKey,
+          model: aiConfig.model,
+          ollamaUrl: aiConfig.ollamaUrl,
+          content: item.bullets,
+          context: {
+            role: item.role,
+            company: item.company,
+          },
+        }),
+      });
+
+      const json = await res.json();
+      if (json.success && json.result) {
+        setDiffModal({
+          isOpen: true,
+          original: item.bullets,
+          enhanced: json.result,
+          title: `Enhance ${item.role || "Role"} Highlights`,
+          onApply: (newText) => {
+            updateExperience(item.id, "bullets", newText);
+          },
+        });
+      } else {
+        alert(json.error || "Failed to enhance bullets with AI.");
+      }
+    } catch (err: any) {
+      alert(err.message || "Failed to communicate with AI.");
+    } finally {
+      setActiveEnhanceId(null);
+    }
+  };
+
+  // AI Action: Enhance Project Bullets
+  const handleImproveProjectAi = async (item: ProjectItem) => {
+    if (!isAiConfigured) {
+      setIsAiSettingsOpen(true);
+      return;
+    }
+
+    if (!item.bullets.trim()) {
+      alert("Please add at least one rough bullet point first to enhance.");
+      return;
+    }
+
+    setActiveEnhanceId(item.id);
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "enhance-bullets",
+          provider: aiConfig.provider,
+          apiKey: aiConfig.apiKey,
+          model: aiConfig.model,
+          ollamaUrl: aiConfig.ollamaUrl,
+          content: item.bullets,
+          context: {
+            projectName: item.name,
+          },
+        }),
+      });
+
+      const json = await res.json();
+      if (json.success && json.result) {
+        setDiffModal({
+          isOpen: true,
+          original: item.bullets,
+          enhanced: json.result,
+          title: `Enhance ${item.name || "Project"} Highlights`,
+          onApply: (newText) => {
+            updateProject(item.id, "bullets", newText);
+          },
+        });
+      } else {
+        alert(json.error || "Failed to enhance project highlights with AI.");
+      }
+    } catch (err: any) {
+      alert(err.message || "Failed to communicate with AI.");
+    } finally {
+      setActiveEnhanceId(null);
+    }
+  };
+
   if (!isLoaded) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-[#F3F2EF]">
@@ -82,6 +257,8 @@ export default function Home() {
         onClear={clearAll}
         onExportJSON={exportJSON}
         onImportJSON={importJSON}
+        onOpenAiSettings={() => setIsAiSettingsOpen(true)}
+        isAiConfigured={isAiConfigured}
         lastSaved={lastSaved}
       />
 
@@ -143,6 +320,11 @@ export default function Home() {
               updateSkillCategory={updateSkillCategory}
               removeSkillCategory={removeSkillCategory}
               moveSection={moveSection}
+              onGenerateSummaryAi={handleGenerateSummaryAi}
+              isGeneratingSummary={isGeneratingSummary}
+              onImproveExperienceAi={handleImproveExperienceAi}
+              onImproveProjectAi={handleImproveProjectAi}
+              activeEnhanceId={activeEnhanceId}
             />
           </div>
         </div>
@@ -168,6 +350,24 @@ export default function Home() {
         isOpen={isPrintModalOpen}
         onClose={() => setIsPrintModalOpen(false)}
         onConfirm={triggerNativePrint}
+      />
+
+      {/* AI Settings Modal */}
+      <AiSettingsModal
+        isOpen={isAiSettingsOpen}
+        onClose={() => setIsAiSettingsOpen(false)}
+        config={aiConfig}
+        onSave={saveAiConfig}
+      />
+
+      {/* AI Diff / Review Modal */}
+      <AiDiffModal
+        isOpen={diffModal.isOpen}
+        onClose={() => setDiffModal((prev) => ({ ...prev, isOpen: false }))}
+        originalText={diffModal.original}
+        enhancedText={diffModal.enhanced}
+        title={diffModal.title}
+        onApply={diffModal.onApply}
       />
     </div>
   );

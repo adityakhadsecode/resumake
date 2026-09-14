@@ -30,16 +30,18 @@ Update this file after every meaningful implementation change.
 - [x] Verified `npm run dev` serves `http://localhost:3000` with HTTP 200 OK.
 - [x] Published code to GitHub repository [adityakhadsecode/resumake](https://github.com/adityakhadsecode/resumake) on `main` and `resumake` branches.
 
+- [x] **Unit 2.1**: Built `AiSettingsModal` and `useAiConfig` managing BYOK keys in browser `localStorage` with connection testing.
+- [x] **Unit 2.2**: Implemented Next.js route handler (`/api/ai`) with native fetch supporting Gemini, OpenAI, Groq, and Ollama.
+- [x] **Unit 2.3**: Built "Improve with AI" on Experience and Projects with before/after `AiDiffModal` (Google XYZ formula rewriting) and "Draft with AI" summary generator.
+
 ## In Progress
 
-- Phase 2 Planning: Resume parsing/importing (PDF/DOCX) + AI integration (BYOK in LocalStorage for local clone, rate-limited proxy for web).
+- Phase 2: Resume File Parser & Importer (PDF/DOCX/LinkedIn JSON)
 
 ## Next Up (Phase 2 Roadmap)
 
-1. **Unit 2.1**: AI Settings Modal (BYOK key entry for Gemini / OpenAI / Groq / Ollama stored in `localStorage`).
-2. **Unit 2.2**: AI bullet point enhancer ("Improve with AI" button on work experience & projects).
-3. **Unit 2.3**: AI summary generator based on existing experience & skills.
-4. **Unit 2.4**: Resume file parser / importer (PDF and text extraction).
+1. **Unit 2.4**: Resume file parser & importer (Drag & drop PDF / text extraction to auto-populate resume fields).
+2. **Unit 2.5**: One-click AI resume tailor (tailoring whole resume to a target job description).
 
 ## Open Questions
 

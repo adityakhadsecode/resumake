@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ResumeData } from "@/types/resume";
+import { ResumeData, ExperienceItem, ProjectItem } from "@/types/resume";
 import { PersonalInfoForm } from "./PersonalInfoForm";
 import { SummaryForm } from "./SummaryForm";
 import { ExperienceForm } from "./ExperienceForm";
@@ -30,6 +30,11 @@ interface FormPaneProps {
   updateSkillCategory: (id: string, field: any, value: string) => void;
   removeSkillCategory: (id: string) => void;
   moveSection: (from: number, to: number) => void;
+  onGenerateSummaryAi?: () => void;
+  isGeneratingSummary?: boolean;
+  onImproveExperienceAi?: (item: ExperienceItem) => void;
+  onImproveProjectAi?: (item: ProjectItem) => void;
+  activeEnhanceId?: string | null;
 }
 
 export function FormPane({
@@ -51,6 +56,11 @@ export function FormPane({
   addSkillCategory,
   updateSkillCategory,
   removeSkillCategory,
+  onGenerateSummaryAi,
+  isGeneratingSummary,
+  onImproveExperienceAi,
+  onImproveProjectAi,
+  activeEnhanceId,
 }: FormPaneProps) {
   return (
     <div className="no-print">
@@ -66,6 +76,8 @@ export function FormPane({
       <SummaryForm
         value={data.summary}
         onChange={updateSummary}
+        onGenerateAi={onGenerateSummaryAi}
+        isGenerating={isGeneratingSummary}
       />
 
       {/* Experience Section */}
@@ -75,6 +87,8 @@ export function FormPane({
         onUpdate={updateExperience}
         onRemove={removeExperience}
         onMove={moveExperience}
+        onImproveWithAi={onImproveExperienceAi}
+        activeEnhanceId={activeEnhanceId}
       />
 
       {/* Projects Section */}
@@ -84,6 +98,8 @@ export function FormPane({
         onUpdate={updateProject}
         onRemove={removeProject}
         onMove={moveProject}
+        onImproveWithAi={onImproveProjectAi}
+        activeEnhanceId={activeEnhanceId}
       />
 
       {/* Education Section */}
