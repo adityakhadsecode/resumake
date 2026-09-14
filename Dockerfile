@@ -27,9 +27,9 @@ RUN ARCH=$(uname -m) \
     && curl -fsSL "https://github.com/tectonic-typesetting/tectonic/releases/download/tectonic%400.17.0/tectonic-0.17.0-${TECTONIC_ARCH}.tar.gz" | tar -xz -C /usr/local/bin \
     && tectonic --version
 
-# Pre-warm Tectonic bundle cache so standard packages/formats are baked into the image
-# This prevents cold-start request timeouts on first compilation
-RUN echo '\\documentclass{article}\\begin{document}init\\end{document}' > /tmp/init.tex \
+# Pre-warm Tectonic bundle cache so all resume template packages & fonts are baked into the image
+# This prevents cold-start network downloads and execution timeouts on first compile
+RUN printf '\\documentclass[10pt]{article}\n\\usepackage{latexsym,titlesec,marvosym,verbatim,enumitem,fancyhdr,tabularx}\n\\usepackage[empty]{fullpage}\n\\usepackage[usenames,dvipsnames]{color}\n\\usepackage[hidelinks]{hyperref}\n\\usepackage[english]{babel}\n\\begin{document}init\\end{document}\n' > /tmp/init.tex \
     && tectonic /tmp/init.tex \
     && rm -f /tmp/init.*
 

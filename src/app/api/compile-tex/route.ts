@@ -63,8 +63,8 @@ export async function POST(req: NextRequest) {
     try {
       await execFileAsync("tectonic", ["resume.tex", "--outdir", tempDir], {
         cwd: tempDir,
-        timeout: 15000,
-        maxBuffer: 10 * 1024 * 1024,
+        timeout: 30000,
+        maxBuffer: 15 * 1024 * 1024,
       });
     } catch (compileErr: any) {
       // Check if tectonic binary is missing on this machine
