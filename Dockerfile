@@ -19,10 +19,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     zlib1g \
     && rm -rf /var/lib/apt/lists/*
 
-# Install static Tectonic binary to /usr/local/bin
-RUN cd /usr/local/bin \
-    && curl --proto '=https' --tlsv1.2 -fsSL https://drop-sh.fullyjustified.net | sh \
+# Install static Tectonic (musl binary has zero glibc version dependency and works on all Linux environments)
+RUN ARCH=$(uname -m) \
+    && if [ "$ARCH" = "x86_64" ]; then TECTONIC_ARCH="x86_64-unknown-linux-musl"; \
+       elif [ "$ARCH" = "aarch64" ]; then TECTONIC_ARCH="aarch64-unknown-linux-musl"; \
+       else echo "Unsupported architecture: $ARCH" && exit 1; fi \
+    && curl -fsSL "https://github.com/tectonic-typesetting/tectonic/releases/download/tectonic%400.17.0/tectonic-0.17.0-${TECTONIC_ARCH}.tar.gz" | tar -xz -C /usr/local/bin \
     && tectonic --version
+
+# Pre-warm Tectonic bundle cache so standard packages/formats are baked into the image
+# This prevents cold-start request timeouts on first compilation
+RUN echo '\\documentclass{article}\\begin{document}init\\end{document}' > /tmp/init.tex \
+    && tectonic /tmp/init.tex \
+    && rm -f /tmp/init.*
 
 # ---- Stage 2: Dependencies ----
 FROM base AS deps
