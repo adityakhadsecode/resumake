@@ -35,18 +35,26 @@ Update this file after every meaningful implementation change.
 - [x] **Unit 2.3**: Built "Improve with AI" on Experience and Projects with before/after `AiDiffModal` (Google XYZ formula rewriting) and "Draft with AI" summary generator.
 - [x] **Unit 2.4**: Built Resume File Parser & Importer (`ResumeImportModal`, `/api/parse` route with `unpdf` & `mammoth`, AI semantic structuring into `ResumeData`, and safety review modal with replace/merge options).
 - [x] **Unit 2.5**: Built One-Click AI Job Tailor (`JobTailorModal`, ATS keyword match & gap analysis, match score percentage, and selective application of tailored summaries, bullets, and skills).
+- [x] **Unit 3.1**: Built portable LaTeX mapper `resumeToTex` (clean single-column article class, strict character escaping, zero `.cls` dependencies).
+- [x] **Unit 3.2**: Built stateless `/api/compile-tex` route executing Tectonic in an isolated temporary sandbox with inline `stderr` compile error reporting and guaranteed cleanup.
+- [x] **Unit 3.3**: Built Overleaf-lite `LatexEditorPane` with Monaco editor, Recompile trigger, dirty-state tracking, and unsaved edits confirmation modal.
+- [x] **Unit 3.4**: Built multi-format client-side export engine (DOCX via `docx.js`, clean ATS plain text `.txt`, portable `.tex`, and full JSON state backup) with badges distinguishing offline from server-compiled formats.
+- [x] **Unit 3.5**: Created production multi-stage `Dockerfile` installing static Tectonic binary and documented architecture exceptions in `README.md`.
 
 ## Current Phase
 
 - Phase 1: Core Form Builder & High-Fidelity PDF Export (Complete)
 - Phase 2: Resume Import & AI Integration (Complete)
-- Phase 3: LaTeX Resume Integration & WASM/Cloud Compilation (Ready to Start)
+- Phase 3: LaTeX Compilation ("Overleaf-lite") & Multi-Format Export (Complete)
+- Phase 4: Curated Template Gallery (Ready to Start)
 
-## Next Up (Phase 3 Roadmap)
+## Next Up (Phase 4 Roadmap)
 
-1. **Unit 3.1**: Bi-directional LaTeX template generator and code viewer.
-2. **Unit 3.2**: Serverless / WASM LaTeX compilation engine (MiTeX / Typst / SwiftLaTeX).
-3. **Unit 3.3**: Dual-sync editor (edit LaTeX code or form inputs with instant 2-way reflection).
+1. **Unit 4.1**: Template engine abstraction separating content models from visual styling.
+2. **Unit 4.2**: Modern Executive template (accent colors, compact header, corporate hierarchy).
+3. **Unit 4.3**: Academic / CV template (dense typography, research publications, honors, grants).
+4. **Unit 4.4**: Two-column sidebar template (skills, contact, and certifications in structured rail).
+5. **Unit 4.5**: Template picker carousel with live thumbnail previews.
 
 ## Open Questions
 

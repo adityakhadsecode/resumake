@@ -37,10 +37,19 @@ Commercial resume builders (Zety, Resume.io, Novoresume, etc.) trick job seekers
 | Phase | Description | Status |
 | :--- | :--- | :--- |
 | **Phase 1** | Core Form Builder, Live Preview, and Vector PDF Export | ✅ **Complete** |
-| **Phase 2** | Resume Import (PDF/DOCX) + AI Bullet Point & Summary Enhancer | 🚧 *Up Next* |
-| **Phase 3** | LaTeX Resume Integration & WASM Serverless Compilation | 📋 *Planned* |
+| **Phase 2** | Resume Import (PDF/DOCX) + BYOK AI Assistant & Job Tailor | ✅ **Complete** |
+| **Phase 3** | LaTeX Compilation ("Overleaf-lite") & Multi-Format Export (DOCX, TXT, TEX) | ✅ **Complete** |
 | **Phase 4** | Curated Template Gallery (Jake's Resume, Executive, Academic CV) | 📋 *Planned* |
 | **Phase 5** | ATS Compatibility Audit & AI Keyword Matching Suite | 📋 *Planned* |
+
+---
+
+## 🏛 Architecture Exceptions
+
+Resumake is designed from the ground up as a **100% Local-First** web application:
+- Form editing, LocalStorage auto-save, JSON export/import, Plain-Text (`.txt`) generation, raw LaTeX (`.tex`) source download, client-side Microsoft Word (`.docx`) generation, and native Print-PDF downloads run **entirely in your browser with zero network calls**.
+- **The Only Exception**: **LaTeX PDF Compilation (`/api/compile-tex`)** is the single feature requiring a live backend environment. Because it invokes the single static `tectonic` binary via `child_process.execFile` in an isolated sandbox, it requires a **container-based deployment target** (such as [Fly.io](https://fly.io), [Railway](https://railway.app), [Render](https://render.com), [AWS Cloud Run](https://aws.amazon.com), or Docker) rather than standard Vercel or Netlify serverless functions.
+- A multi-stage [Dockerfile](Dockerfile) with Tectonic pre-installed is included in the repository for one-command container deployment.
 
 ---
 
