@@ -42,3 +42,8 @@ next-env.d.ts
 
 # temp
 temp-next-app/
+
+# AI Agent tooling & skills
+.agents/
+.claude/
+skills-lock.json
