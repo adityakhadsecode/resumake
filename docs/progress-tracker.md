@@ -39,7 +39,7 @@ Update this file after every meaningful implementation change.
 - [x] **Unit 3.2**: Built stateless `/api/compile-tex` route executing Tectonic in an isolated temporary sandbox with inline `stderr` compile error reporting and guaranteed cleanup.
 - [x] **Unit 3.3**: Built Overleaf-lite `LatexEditorPane` with Monaco editor, Recompile trigger, dirty-state tracking, and unsaved edits confirmation modal.
 - [x] **Unit 3.4**: Built multi-format client-side export engine (DOCX via `docx.js`, clean ATS plain text `.txt`, portable `.tex`, and full JSON state backup) with badges distinguishing offline from server-compiled formats.
-- [x] **Unit 3.5**: Created production multi-stage `Dockerfile` installing static Tectonic binary and documented architecture exceptions in `README.md`.
+- [x] **Unit 3.5**: Created production multi-stage `Dockerfile` with multi-arch static musl Tectonic binary, pre-warmed LaTeX bundle cache (zero cold-start timeouts), `.dockerignore`, `docker-compose.yml`, and documented architecture exceptions in `README.md`. Local container verified on port 3000 with sub-second PDF compilation.
 
 ## Current Phase
 
