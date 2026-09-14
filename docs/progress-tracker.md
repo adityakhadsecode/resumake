@@ -28,6 +28,7 @@ Update this file after every meaningful implementation change.
 - [x] Added warm paper-and-ink Print Guidance Modal reminding users to uncheck "Headers & footers" and check "Background graphics", with "Don't show again" persistence.
 - [x] Verified `npm run build` passes with zero errors and Turbopack builds cleanly.
 - [x] Verified `npm run dev` serves `http://localhost:3000` with HTTP 200 OK.
+- [x] Published code to GitHub repository [adityakhadsecode/resumake](https://github.com/adityakhadsecode/resumake) on `main` and `resumake` branches.
 
 ## In Progress
 
