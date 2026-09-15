@@ -2,22 +2,39 @@
 
 import React, { useState } from "react";
 import { ResumeData } from "@/types/resume";
-import { JakesTemplate } from "@/components/templates/JakesTemplate";
+import { ResumeDesign } from "@/types/template";
+import { TemplateRenderer } from "@/components/templates/TemplateRenderer";
+import { DesignToolbar } from "@/components/preview/DesignToolbar";
 
 interface PreviewPaneProps {
   data: ResumeData;
+  design: ResumeDesign;
+  onUpdateDesign: (updates: Partial<ResumeDesign>) => void;
+  onOpenTemplatePicker: () => void;
   onPrint: () => void;
 }
 
-export function PreviewPane({ data }: PreviewPaneProps) {
+export function PreviewPane({
+  data,
+  design,
+  onUpdateDesign,
+  onOpenTemplatePicker,
+}: PreviewPaneProps) {
   const [zoom, setZoom] = useState(100);
 
   return (
     <div className="flex h-full flex-col bg-[#E9E7E1]">
+      {/* Live Design & Formatting Toolbar */}
+      <DesignToolbar
+        design={design}
+        onUpdateDesign={onUpdateDesign}
+        onOpenTemplatePicker={onOpenTemplatePicker}
+      />
+
       {/* Minimal Top Control Bar */}
-      <div className="no-print flex items-center justify-between px-6 py-2.5 border-b border-[#DAD5C9] bg-[#E9E7E1]/90">
+      <div className="no-print flex items-center justify-between px-6 py-2 border-b border-[#DAD5C9] bg-[#E9E7E1]/90">
         <span className="text-[11.5px] font-medium text-[#5B5F6B]">
-          Print Preview (Letter)
+          Live Vector Canvas (Letter / A4)
         </span>
 
         {/* Minimal Zoom Controls */}
@@ -68,7 +85,7 @@ export function PreviewPane({ data }: PreviewPaneProps) {
                 "0 1px 3px rgba(28,29,33,0.15), 0 1px 12px rgba(28,29,33,0.08)",
             }}
           >
-            <JakesTemplate data={data} />
+            <TemplateRenderer data={data} design={design} />
           </div>
         </div>
       </div>

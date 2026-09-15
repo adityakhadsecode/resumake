@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import { UploadCloud, Target, FileText, Code2 } from "lucide-react";
+import { UploadCloud, Target, FileText, Code2, LayoutTemplate } from "lucide-react";
 import { ExportMenu } from "./ExportMenu";
 
 interface HeaderBarProps {
@@ -20,6 +20,7 @@ interface HeaderBarProps {
   onOpenAiSettings: () => void;
   onOpenImportModal: () => void;
   onOpenTailorModal: () => void;
+  onOpenTemplatePicker?: () => void;
   isAiConfigured: boolean;
   lastSaved: Date | null;
 }
@@ -40,6 +41,7 @@ export function HeaderBar({
   onOpenAiSettings,
   onOpenImportModal,
   onOpenTailorModal,
+  onOpenTemplatePicker,
   isAiConfigured,
   lastSaved,
 }: HeaderBarProps) {
@@ -136,6 +138,19 @@ export function HeaderBar({
         >
           Clear
         </button>
+
+        {/* Templates */}
+        {onOpenTemplatePicker && (
+          <button
+            type="button"
+            onClick={onOpenTemplatePicker}
+            className="flex items-center gap-1.5 text-[12.5px] font-medium text-[#28344E] hover:underline cursor-pointer px-1.5 py-1"
+            title="Browse and select curated ATS-safe resume templates"
+          >
+            <LayoutTemplate size={14} className="text-[#28344E]" />
+            <span className="hidden sm:inline">Templates</span>
+          </button>
+        )}
 
         {/* Import Resume */}
         <button

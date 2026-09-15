@@ -5,15 +5,15 @@ import { ResumeData } from "@/types/resume";
 import { ResumeDesign } from "@/types/template";
 import { getFontFamilyCss, getDensityConfig, getFontScaleConfig } from "@/lib/designUtils";
 
-interface JakesTemplateProps {
+interface ModernExecutiveTemplateProps {
   data: ResumeData;
   design?: ResumeDesign;
 }
 
-export function JakesTemplate({ data, design }: JakesTemplateProps) {
+export function ModernExecutiveTemplate({ data, design }: ModernExecutiveTemplateProps) {
   const { personalInfo, summary, experience, projects, education, skills, sectionOrder } = data;
 
-  const fontCss = getFontFamilyCss(design?.fontFamily || "georgia");
+  const fontCss = getFontFamilyCss(design?.fontFamily || "inter");
   const density = getDensityConfig(design?.density || "normal");
   const scale = getFontScaleConfig(design?.fontScale || "normal");
   const accentColor = design?.accentColor || "#28344E";
@@ -27,13 +27,27 @@ export function JakesTemplate({ data, design }: JakesTemplateProps) {
     personalInfo.github,
   ].filter(Boolean);
 
+  const SectionHeading = ({ title }: { title: string }) => (
+    <div
+      className="flex items-center gap-2.5 mb-2.5 font-bold uppercase tracking-[0.08em]"
+      style={{ fontSize: scale.headingSize, color: accentColor }}
+    >
+      <span
+        className="w-1 h-3.5 rounded-full inline-block"
+        style={{ backgroundColor: accentColor }}
+      />
+      <span>{title}</span>
+      <span className="flex-1 h-[1px] bg-[#E2DFD8]" />
+    </div>
+  );
+
   const renderSummary = () => {
     if (!summary) return null;
     return (
       <div key="summary" style={{ marginTop: density.sectionMargin }}>
-        <div className="border-t border-[#DAD5C9]" style={{ marginBottom: density.ruleMargin }} />
+        <SectionHeading title="Executive Summary" />
         <p
-          className="text-[#2B2C30] m-0"
+          className="text-[#2B2C30] m-0 pl-3.5 border-l-2 border-[#E2DFD8] italic"
           style={{ fontSize: scale.bodySize, lineHeight: density.lineHeight }}
         >
           {summary}
@@ -46,13 +60,7 @@ export function JakesTemplate({ data, design }: JakesTemplateProps) {
     if (!experience || experience.length === 0) return null;
     return (
       <div key="experience" style={{ marginTop: density.sectionMargin }}>
-        <div className="border-t border-[#DAD5C9]" style={{ marginBottom: density.ruleMargin }} />
-        <div
-          className="font-bold uppercase tracking-[0.06em] mb-2"
-          style={{ fontSize: scale.headingSize, color: accentColor }}
-        >
-          Experience
-        </div>
+        <SectionHeading title="Work Experience" />
         {experience.map((exp) => {
           const bullets = exp.bullets
             ? exp.bullets
@@ -67,23 +75,32 @@ export function JakesTemplate({ data, design }: JakesTemplateProps) {
               className="page-break-inside-avoid"
               style={{ marginBottom: density.itemMargin }}
             >
-              <div className="flex justify-between items-baseline gap-3">
-                <span className="font-bold text-[#1C1D21]" style={{ fontSize: scale.bodySize }}>
+              <div className="flex justify-between items-baseline gap-2">
+                <div className="font-bold text-[#1C1D21]" style={{ fontSize: scale.bodySize }}>
                   {exp.role}
-                  {exp.company ? `, ${exp.company}` : ""}
-                </span>
-                <span className="text-[#5B5F6B] whitespace-nowrap" style={{ fontSize: scale.smallSize }}>
+                  {exp.company && (
+                    <span className="font-semibold text-[#5B5F6B]"> — {exp.company}</span>
+                  )}
+                </div>
+                <div
+                  className="px-2 py-0.5 rounded text-[11px] font-medium shrink-0"
+                  style={{
+                    backgroundColor: `${accentColor}12`,
+                    color: accentColor,
+                    fontSize: scale.smallSize,
+                  }}
+                >
                   {[exp.startDate, exp.endDate || (exp.current ? "Present" : "")].filter(Boolean).join(" – ")}
-                </span>
+                </div>
               </div>
               {exp.location && (
-                <div className="text-[#5B5F6B] italic mt-0.5" style={{ fontSize: scale.smallSize }}>
+                <div className="text-[#5B5F6B] text-[11.5px] mt-0.5" style={{ fontSize: scale.smallSize }}>
                   {exp.location}
                 </div>
               )}
               {bullets.length > 0 && (
                 <ul
-                  className="pl-4 text-[#2B2C30] list-disc mt-1"
+                  className="pl-4 text-[#2B2C30] list-disc mt-1.5"
                   style={{ fontSize: scale.bodySize, lineHeight: density.lineHeight }}
                 >
                   {bullets.map((b, i) => (
@@ -104,13 +121,7 @@ export function JakesTemplate({ data, design }: JakesTemplateProps) {
     if (!projects || projects.length === 0) return null;
     return (
       <div key="projects" style={{ marginTop: density.sectionMargin }}>
-        <div className="border-t border-[#DAD5C9]" style={{ marginBottom: density.ruleMargin }} />
-        <div
-          className="font-bold uppercase tracking-[0.06em] mb-2"
-          style={{ fontSize: scale.headingSize, color: accentColor }}
-        >
-          Projects
-        </div>
+        <SectionHeading title="Key Projects & Initiatives" />
         {projects.map((proj) => {
           const bullets = proj.bullets
             ? proj.bullets
@@ -125,14 +136,19 @@ export function JakesTemplate({ data, design }: JakesTemplateProps) {
               className="page-break-inside-avoid"
               style={{ marginBottom: density.itemMargin }}
             >
-              <div className="flex justify-between items-baseline gap-3">
-                <span className="font-bold text-[#1C1D21]" style={{ fontSize: scale.bodySize }}>
+              <div className="flex justify-between items-baseline gap-2">
+                <div className="font-bold text-[#1C1D21]" style={{ fontSize: scale.bodySize }}>
                   {proj.name}
-                  {proj.technologies ? ` — ${proj.technologies}` : ""}
-                </span>
+                  {proj.technologies && (
+                    <span className="font-normal text-[#5B5F6B]"> | {proj.technologies}</span>
+                  )}
+                </div>
                 {proj.link && (
-                  <span className="text-[#5B5F6B] whitespace-nowrap" style={{ fontSize: scale.smallSize }}>
-                    {proj.link}
+                  <span
+                    className="text-[11.5px] underline"
+                    style={{ color: accentColor, fontSize: scale.smallSize }}
+                  >
+                    {proj.link.replace(/^https?:\/\//, "")}
                   </span>
                 )}
               </div>
@@ -143,7 +159,7 @@ export function JakesTemplate({ data, design }: JakesTemplateProps) {
               )}
               {bullets.length > 0 && (
                 <ul
-                  className="pl-4 text-[#2B2C30] list-disc mt-1"
+                  className="pl-4 text-[#2B2C30] list-disc mt-1.5"
                   style={{ fontSize: scale.bodySize, lineHeight: density.lineHeight }}
                 >
                   {bullets.map((b, i) => (
@@ -164,29 +180,23 @@ export function JakesTemplate({ data, design }: JakesTemplateProps) {
     if (!education || education.length === 0) return null;
     return (
       <div key="education" style={{ marginTop: density.sectionMargin }}>
-        <div className="border-t border-[#DAD5C9]" style={{ marginBottom: density.ruleMargin }} />
-        <div
-          className="font-bold uppercase tracking-[0.06em] mb-2"
-          style={{ fontSize: scale.headingSize, color: accentColor }}
-        >
-          Education
-        </div>
+        <SectionHeading title="Education & Credentials" />
         {education.map((ed) => (
           <div
             key={ed.id}
             className="page-break-inside-avoid"
             style={{ marginBottom: density.itemMargin }}
           >
-            <div className="flex justify-between items-baseline gap-3">
+            <div className="flex justify-between items-baseline gap-2">
               <span className="font-bold text-[#1C1D21]" style={{ fontSize: scale.bodySize }}>
                 {ed.school}
               </span>
-              <span className="text-[#5B5F6B] whitespace-nowrap" style={{ fontSize: scale.smallSize }}>
+              <span className="text-[#5B5F6B] text-[11px] shrink-0" style={{ fontSize: scale.smallSize }}>
                 {[ed.startDate, ed.endDate].filter(Boolean).join(" – ")}
               </span>
             </div>
             {ed.degree && (
-              <div className="text-[#5B5F6B] italic mt-0.5" style={{ fontSize: scale.smallSize }}>
+              <div className="text-[#28344E] font-medium mt-0.5" style={{ fontSize: scale.smallSize }}>
                 {ed.degree}
               </div>
             )}
@@ -205,31 +215,38 @@ export function JakesTemplate({ data, design }: JakesTemplateProps) {
     if (!skills || skills.length === 0) return null;
     return (
       <div key="skills" style={{ marginTop: density.sectionMargin }}>
-        <div className="border-t border-[#DAD5C9]" style={{ marginBottom: density.ruleMargin }} />
-        <div
-          className="font-bold uppercase tracking-[0.06em] mb-2"
-          style={{ fontSize: scale.headingSize, color: accentColor }}
-        >
-          Skills
-        </div>
-        <div
-          className="text-[#2B2C30] space-y-1"
-          style={{ fontSize: scale.bodySize, lineHeight: density.lineHeight }}
-        >
+        <SectionHeading title="Core Competencies" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
           {skills.map((cat) => (
-            <div key={cat.id} className="page-break-inside-avoid">
+            <div
+              key={cat.id}
+              className="p-2.5 rounded bg-[#F8F7F4] border border-[#E8E5DC] page-break-inside-avoid"
+            >
               {cat.category && (
-                <span className="font-bold text-[#1C1D21]">
-                  {cat.category}:{" "}
-                </span>
+                <div
+                  className="font-bold uppercase tracking-wider text-[11px] mb-1"
+                  style={{ color: accentColor }}
+                >
+                  {cat.category}
+                </div>
               )}
-              <span>
+              <div
+                className="text-[#2B2C30] flex flex-wrap gap-1.5"
+                style={{ fontSize: scale.smallSize }}
+              >
                 {cat.skills
                   .split(",")
                   .map((s) => s.trim())
                   .filter(Boolean)
-                  .join("   ·   ")}
-              </span>
+                  .map((skill, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2 py-0.5 rounded bg-[#FFFFFF] border border-[#DAD5C9] text-[11.5px]"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+              </div>
             </div>
           ))}
         </div>
@@ -251,38 +268,53 @@ export function JakesTemplate({ data, design }: JakesTemplateProps) {
 
   return (
     <div
-      className="resume-sheet bg-[#FAFAF8] text-[#1C1D21] w-full max-w-[640px] min-h-[820px] box-border mx-auto select-text transition-all duration-150"
+      className="resume-sheet bg-[#FFFFFF] text-[#1C1D21] w-full max-w-[640px] min-h-[820px] box-border mx-auto select-text shadow-sm"
       style={{
         fontFamily: fontCss,
         padding: density.sheetPadding,
       }}
     >
-      {/* Name */}
+      {/* Top Corporate Accent Bar */}
       <div
-        className="font-bold tracking-[-0.01em] text-[#1C1D21] leading-tight"
-        style={{ fontSize: scale.nameSize }}
-      >
-        {personalInfo.name || "Your Name"}
+        className="w-full h-1.5 rounded-full mb-6"
+        style={{ backgroundColor: accentColor }}
+      />
+
+      {/* Header Info */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-2 pb-4 border-b border-[#E2DFD8]">
+        <div>
+          <h1
+            className="font-extrabold tracking-tight text-[#1C1D21] m-0 leading-none"
+            style={{ fontSize: scale.nameSize }}
+          >
+            {personalInfo.name || "Your Name"}
+          </h1>
+          {personalInfo.title && (
+            <div
+              className="mt-1 font-semibold uppercase tracking-wider text-[13px]"
+              style={{ color: accentColor, fontSize: scale.titleSize }}
+            >
+              {personalInfo.title}
+            </div>
+          )}
+        </div>
+
+        {contactItems.length > 0 && (
+          <div
+            className="text-[#5B5F6B] text-[11px] leading-relaxed text-left md:text-right"
+            style={{ fontSize: scale.smallSize }}
+          >
+            {contactItems.map((item, i) => (
+              <span key={i}>
+                {item}
+                {i < contactItems.length - 1 && <span className="mx-1.5 opacity-40">|</span>}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Title */}
-      {personalInfo.title && (
-        <div className="mt-0.5 font-medium" style={{ fontSize: scale.titleSize, color: accentColor }}>
-          {personalInfo.title}
-        </div>
-      )}
-
-      {/* Contact Line */}
-      {contactItems.length > 0 && (
-        <div
-          className="text-[#5B5F6B] mt-1.5 leading-normal"
-          style={{ fontSize: scale.smallSize }}
-        >
-          {contactItems.join("   ·   ")}
-        </div>
-      )}
-
-      {/* Dynamic Sections */}
+      {/* Content Sections */}
       {order.map((secKey) => (sectionMap[secKey] ? sectionMap[secKey]() : null))}
     </div>
   );

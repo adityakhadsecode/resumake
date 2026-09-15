@@ -47,3 +47,6 @@ temp-next-app/
 .agents/
 .claude/
 skills-lock.json
+
+# PR Lens writes its previews here. They are rebuilt on demand.
+.pr-lens/

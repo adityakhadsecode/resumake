@@ -40,21 +40,26 @@ Update this file after every meaningful implementation change.
 - [x] **Unit 3.3**: Built Overleaf-lite `LatexEditorPane` with Monaco editor, Recompile trigger, dirty-state tracking, and unsaved edits confirmation modal.
 - [x] **Unit 3.4**: Built multi-format client-side export engine (DOCX via `docx.js`, clean ATS plain text `.txt`, portable `.tex`, and full JSON state backup) with badges distinguishing offline from server-compiled formats.
 - [x] **Unit 3.5**: Created production multi-stage `Dockerfile` with multi-arch static musl Tectonic binary, pre-warmed LaTeX bundle cache (zero cold-start timeouts), `.dockerignore`, `docker-compose.yml`, and documented architecture exceptions in `README.md`. Local container verified on port 3000 with sub-second PDF compilation.
+- [x] **Unit 4.1**: Template engine abstraction separating content models (`ResumeData`) from visual styling (`ResumeDesign`) with `useResumeDesign` hook and `TemplateRenderer` dispatcher.
+- [x] **Unit 4.2**: Modern Executive template with corporate hierarchy, accent lines, and distinguished company/role cards.
+- [x] **Unit 4.3**: Academic / CV template with dense scholarly format, education-first layout, and bibliographic publication styling.
+- [x] **Unit 4.4**: Two-column sidebar template with asymmetric grid (~34% left rail for contact/skills/education, ~66% main column for summary/experience/projects).
+- [x] **Unit 4.5**: Live design formatting toolbar (`DesignToolbar`) with typography selector (`Inter`, `Georgia`, `Merriweather`, `Roboto Mono`), accent color palette (`Navy`, `Slate`, `Burgundy`, `Forest`, `Charcoal`, hex picker), 1-page fit density sliders (`compact`, `normal`, `spacious`), and font scaling.
+- [x] **Unit 4.6**: Visual Template Picker modal (`TemplatePickerModal`) with card blueprints, recommendations, and one-click layout switching.
 
 ## Current Phase
 
 - Phase 1: Core Form Builder & High-Fidelity PDF Export (Complete)
 - Phase 2: Resume Import & AI Integration (Complete)
 - Phase 3: LaTeX Compilation ("Overleaf-lite") & Multi-Format Export (Complete)
-- Phase 4: Curated Template Gallery (Ready to Start)
+- Phase 4: Curated Template Gallery & Design System (Complete)
+- Phase 5: ATS Review & Scoring Audit Suite (Ready to Start)
 
-## Next Up (Phase 4 Roadmap)
+## Next Up (Phase 5 Roadmap)
 
-1. **Unit 4.1**: Template engine abstraction separating content models from visual styling.
-2. **Unit 4.2**: Modern Executive template (accent colors, compact header, corporate hierarchy).
-3. **Unit 4.3**: Academic / CV template (dense typography, research publications, honors, grants).
-4. **Unit 4.4**: Two-column sidebar template (skills, contact, and certifications in structured rail).
-5. **Unit 4.5**: Template picker carousel with live thumbnail previews.
+1. **Unit 5.1**: ATS Compatibility Score Calculator and formatting audit engine.
+2. **Unit 5.2**: Bullet Strength Critique (quantified metrics, active action verbs, brevity scoring).
+3. **Unit 5.3**: Missing Keyword Heatmap & role-specific suggestions.
 
 ## Open Questions
 

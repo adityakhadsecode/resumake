@@ -6,7 +6,9 @@ import { useAiConfig } from "@/hooks/useAiConfig";
 import { HeaderBar } from "@/components/builder/HeaderBar";
 import { FormPane } from "@/components/builder/FormPane";
 import { PreviewPane } from "@/components/preview/PreviewPane";
-import { JakesTemplate } from "@/components/templates/JakesTemplate";
+import { TemplateRenderer } from "@/components/templates/TemplateRenderer";
+import { TemplatePickerModal } from "@/components/builder/TemplatePickerModal";
+import { useResumeDesign } from "@/hooks/useResumeDesign";
 import { PrintModal } from "@/components/builder/PrintModal";
 import { AiSettingsModal } from "@/components/builder/AiSettingsModal";
 import { AiDiffModal } from "@/components/builder/AiDiffModal";
@@ -68,6 +70,12 @@ export default function Home() {
   } = useResume();
 
   const { config: aiConfig, isConfigured: isAiConfigured, saveConfig: saveAiConfig } = useAiConfig();
+  const {
+    design,
+    updateDesign,
+    setTemplate,
+    resetDesign,
+  } = useResumeDesign();
 
   // Navigation & View Mode State
   const [activeMode, setActiveMode] = useState<"form" | "latex">("form");
@@ -85,6 +93,7 @@ export default function Home() {
   const [isAiSettingsOpen, setIsAiSettingsOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isTailorModalOpen, setIsTailorModalOpen] = useState(false);
+  const [isTemplatePickerOpen, setIsTemplatePickerOpen] = useState(false);
 
   // Confirmation Modal State (for unsaved LaTeX edits)
   const [confirmModal, setConfirmModal] = useState<{
@@ -455,6 +464,7 @@ export default function Home() {
         onOpenAiSettings={() => setIsAiSettingsOpen(true)}
         onOpenImportModal={() => setIsImportModalOpen(true)}
         onOpenTailorModal={() => setIsTailorModalOpen(true)}
+        onOpenTemplatePicker={() => setIsTemplatePickerOpen(true)}
         isAiConfigured={isAiConfigured}
         lastSaved={lastSaved}
       />
@@ -587,15 +597,29 @@ export default function Home() {
               />
             </div>
           ) : (
-            <PreviewPane data={data} onPrint={handlePrintRequest} />
+            <PreviewPane
+              data={data}
+              design={design}
+              onUpdateDesign={updateDesign}
+              onOpenTemplatePicker={() => setIsTemplatePickerOpen(true)}
+              onPrint={handlePrintRequest}
+            />
           )}
         </div>
       </div>
 
       {/* Print-only clone for pixel-perfect PDF export */}
       <div className="print-only">
-        <JakesTemplate data={data} />
+        <TemplateRenderer data={data} design={design} />
       </div>
+
+      {/* Template Gallery Modal */}
+      <TemplatePickerModal
+        isOpen={isTemplatePickerOpen}
+        onClose={() => setIsTemplatePickerOpen(false)}
+        activeTemplateId={design.templateId}
+        onSelectTemplate={setTemplate}
+      />
 
       {/* Print Guidance Modal */}
       <PrintModal
